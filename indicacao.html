@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicar - Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #1a0505 0%, #000000 100%);
+            --card-glass: rgba(255, 255, 255, 0.05);
+            --red: #e74c3c;
+            --green: #2ecc71;
+            --gold: #FFD700;
+            --silver: #bdc3c7;
+            --bronze: #cd7f32;
+        }
+
+        /* REMOVENDO O CONTORNO AZUL DE SELEÇÃO E FOCO */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+            outline: none !important; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            margin: 0; padding: 20px; font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient); color: white; min-height: 100vh;
+            text-align: center; padding-bottom: 100px;
+        }
+
+        .header { display: flex; align-items: center; margin-bottom: 30px; }
+        .header a { color: white; text-decoration: none; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; font-weight: 600; }
+
+        .invite-card {
+            background: var(--card-glass);
+            padding: 25px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .level-badge {
+            display: inline-block; padding: 5px 15px; border-radius: 50px;
+            font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+            margin-bottom: 15px; letter-spacing: 1px;
+        }
+        .lvl-bronze { background: var(--bronze); color: #000; }
+        .lvl-prata { background: var(--silver); color: #000; }
+        .lvl-ouro { background: var(--gold); color: #000; }
+
+        .link-box {
+            background: rgba(0,0,0,0.4); padding: 15px;
+            border-radius: 12px; border: 1px dashed var(--red);
+            display: flex; justify-content: space-between; align-items: center;
+            margin: 20px 0;
+        }
+
+        #referral-link { font-size: 0.75rem; color: var(--gold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 85%; font-family: monospace; }
+        .btn-copy { background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; padding: 5px; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-item small { display: block; color: #777; font-size: 0.65rem; margin-bottom: 5px; text-transform: uppercase; }
+        .stat-item span { font-weight: bold; font-size: 1.1rem; color: var(--green); }
+
+        .levels-table {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .level-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .level-row:last-child { border: none; }
+        .level-row i { color: var(--red); margin-right: 10px; width: 20px; text-align: center; }
+        .level-row span { font-size: 0.8rem; flex: 1; }
+        .level-row .count-label { font-size: 0.7rem; color: #777; margin-right: 5px; }
+        .level-row .count-val { font-size: 0.8rem; color: white; margin-right: 15px; font-weight: 600; }
+        .level-row strong { color: var(--green); min-width: 40px; text-align: right; }
+
+        .progress-container { background: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; margin: 10px 0; overflow: hidden; }
+        .progress-bar { background: var(--red); height: 100%; width: 0%; transition: 1s ease-in-out; }
+        .progress-text { font-size: 0.7rem; color: #888; text-align: left; }
+
+        .nav-bottom { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            background: rgba(0, 0, 0, 0.9); 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 12px 0; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            height: 70px;
+            align-items: center;
+        }
+        .nav-item { 
+            color: #555; 
+            text-align: center; 
+            text-decoration: none; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px;
+            padding: 8px 0;
+            border-radius: 15px;
+            transition: 0.3s;
+            margin: 0 5px;
+        }
+        .nav-item i { font-size: 1.3rem; }
+        .nav-item span { font-size: 0.65rem; }
+
+        .nav-item.active { 
+            color: #fff; 
+            background: rgba(231, 76, 60, 0.2); 
+            border: 1px solid rgba(231, 76, 60, 0.4);
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.2);
+        }
+        .nav-item.active i { color: var(--red); }
+
+        .info-step { background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 15px; text-align: left; font-size: 0.8rem; border-left: 3px solid var(--red); margin-top: 20px; line-height: 1.4; }
+        .info-step b { color: var(--red); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="home.html"><i class="fas fa-chevron-left"></i> Voltar</a>
+    </div>
+
+    <div class="invite-card">
+        <div id="user-level-badge" class="level-badge lvl-bronze">Nível Bronze</div>
+        <h2>Rede de Afiliados</h2>
+        <p style="font-size: 0.85rem; color: #bbb;">Expanda sua organização e receba bônus em rede.</p>
+        
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="progress-label" class="progress-text">Carregando metas...</div>
+
+        <div class="link-box">
+            <span id="referral-link">Carregando link...</span>
+            <button class="btn-copy" onclick="window.copyLink()"><i class="far fa-copy"></i></button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <small>Total na Equipe</small>
+                <span id="total-rede">0</span>
+            </div>
+            <div class="stat-item">
+                <small>Ganhos da Rede</small>
+                <span id="bonus-ganho">R$ 0,00</span>
+            </div>
+        </div>
+
+        <div class="levels-table">
+            <div class="level-row">
+                <span><i class="fas fa-user-tie"></i> 1ª Geração</span>
+                <span class="count-label">Membros:</span>
+                <div class="count-val" id="count-l1">0</div>
+                <strong id="com-l1">10%</strong>
+            </div>
+            <div class="level-row">
+                <span><i class="fas fa-users"></i> 2ª Geração</span>
+                <span class="count-label">Membros:</span>
+                <div class="count-val" id="count-l2">0</div>
+                <strong>5%</strong>
+            </div>
+            <div class="level-row">
+                <span><i class="fas fa-network-wired"></i> 3ª Geração</span>
+                <span class="count-label">Membros:</span>
+                <div class="count-val" id="count-l3">0</div>
+                <strong>2%</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-step">
+        <h4 style="margin-top: 0; color: var(--red); margin-bottom: 8px;"><i class="fas fa-rocket"></i> Como funcionam os ganhos?</h4>
+        Ao construir sua rede, você recebe comissões sobre cada ativação de plano em 3 níveis de profundidade. O bônus da <b>1ª Geração</b> aumenta conforme você sobe de nível.
+    </div>
+
+    <nav class="nav-bottom">
+        <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="planos.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Planos</span></a>
+        <a href="indicacao.html" class="nav-item active"><i class="fas fa-share-alt"></i><span>Indicar</span></a>
+        <a href="perfil.html" class="nav-item"><i class="fas fa-user-alt"></i><span>Perfil</span></a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+    authDomain: "monety-site-9175f.firebaseapp.com",
+    projectId: "monety-site-9175f",
+    storageBucket: "monety-site-9175f.firebasestorage.app",
+    messagingSenderId: "840821848803",
+    appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Link de Indicação (Garantindo que use o domínio atual)
+                const baseUrl = window.location.origin;
+                document.getElementById('referral-link').innerText = `${baseUrl}/registro.html?ref=${user.uid}`;
+                
+                // Usando onSnapshot para atualizar em tempo real se o saldo de indicação mudar
+                onSnapshot(doc(db, "usuarios", user.uid), (snap) => {
+                    if(snap.exists()){
+                        const data = snap.data();
+                        
+                        const l1 = data.indicadosCount || 0;
+                        const l2 = data.indicadosL2Count || 0;
+                        const l3 = data.indicadosL3Count || 0;
+                        const totalComissoes = data.totalComissoes || 0;
+                        
+                        document.getElementById('count-l1').innerText = l1;
+                        document.getElementById('count-l2').innerText = l2;
+                        document.getElementById('count-l3').innerText = l3;
+                        document.getElementById('total-rede').innerText = l1 + l2 + l3;
+                        document.getElementById('bonus-ganho').innerText = `R$ ${Number(totalComissoes).toFixed(2).replace('.',',')}`;
+                        
+                        atualizarNiveis(l1);
+                    }
+                });
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        function atualizarNiveis(qtd) {
+            const badge = document.getElementById('user-level-badge');
+            const bar = document.getElementById('progress-bar');
+            const label = document.getElementById('progress-label');
+            const comL1 = document.getElementById('com-l1');
+
+            if (qtd < 10) {
+                badge.innerText = "Nível Bronze";
+                badge.className = "level-badge lvl-bronze";
+                comL1.innerText = "10%";
+                bar.style.width = (qtd / 10 * 100) + "%";
+                label.innerText = `${qtd}/10 indicações para Nível Prata`;
+            } 
+            else if (qtd >= 10 && qtd < 50) {
+                badge.innerText = "Nível Prata";
+                badge.className = "level-badge lvl-prata";
+                comL1.innerText = "15%";
+                bar.style.width = ((qtd - 10) / 40 * 100) + "%";
+                label.innerText = `${qtd}/50 indicações para Nível Ouro`;
+            } 
+            else {
+                badge.innerText = "Nível Ouro";
+                badge.className = "level-badge lvl-ouro";
+                comL1.innerText = "20%";
+                bar.style.width = "100%";
+                label.innerText = "Parabéns! Você atingiu o Nível Máximo";
+            }
+        }
+
+        // FUNÇÃO DE CÓPIA ROBUSTA (Corrigida para type="module")
+        window.copyLink = function() {
+            const link = document.getElementById('referral-link').innerText;
+            if(link === "Carregando link...") return;
+
+            // Tenta o método moderno
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(() => {
+                    sucessoCopia();
+                }).catch(err => {
+                    fallbackCopy(link); // Se der erro, usa o método antigo
+                });
+            } else {
+                fallbackCopy(link); // Se não existir navigator.clipboard
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                sucessoCopia();
+            } catch (err) {
+                console.error('Erro ao copiar', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function sucessoCopia() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Link Copiado!',
+                text: 'Compartilhe com sua equipe.',
+                background: '#1a0505',
+                color: '#fff',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    </script>
+</body>
+</html>

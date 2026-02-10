@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta - Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #1a0505 0%, #000000 100%);
+            --red: #e74c3c;
+            --white: #ffffff;
+        }
+
+        /* REMOVENDO O CONTORNO AZUL DE SELEÇÃO E FOCO */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+            outline: none !important; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body { 
+            background: var(--bg); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            padding: 20px; 
+        }
+        
+        .reg-container { 
+            width: 100%; 
+            max-width: 400px; 
+            background: rgba(255,255,255,0.05); 
+            padding: 30px; 
+            border-radius: 25px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            backdrop-filter: blur(10px); 
+            text-align: center; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .logo { font-size: 2rem; font-weight: 700; color: var(--white); margin-bottom: 5px; letter-spacing: -1px; }
+        .logo span { color: var(--red); }
+        .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 25px; }
+
+        .input-group { margin-bottom: 15px; text-align: left; position: relative; }
+        label { display: block; margin-bottom: 5px; font-size: 0.8rem; color: #aaa; padding-left: 5px; transition: 0.3s; }
+        
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            background: rgba(0,0,0,0.3); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; 
+            color: white; 
+            transition: 0.3s; 
+            font-size: 1rem; 
+        }
+
+        /* EFEITO VERMELHO AO CLICAR/FOCAR NO CAMPO */
+        input:focus { 
+            border-color: var(--red); 
+            background: rgba(231, 76, 60, 0.05); 
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.2);
+        }
+
+        input:focus + label, .input-group:focus-within label {
+            color: var(--red);
+        }
+
+        .btn-reg { 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 12px; 
+            border: none; 
+            background: var(--red); 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            font-size: 1rem; 
+            transition: 0.3s; 
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn-reg:active { transform: scale(0.98); }
+        .btn-reg:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .footer-link { text-align: center; margin-top: 20px; font-size: 0.85rem; }
+        .footer-link a { color: var(--red); text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="reg-container">
+        <div class="logo"><span>Nex</span>us</div>
+        <p class="subtitle">Cadastre-se para começar a lucrar</p>
+        
+        <div class="input-group">
+            <label>Nome Completo</label>
+            <input type="text" id="reg-nome" placeholder="Seu nome">
+        </div>
+
+        <div class="input-group">
+            <label>E-mail</label>
+            <input type="email" id="reg-email" placeholder="seu@email.com">
+        </div>
+
+        <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="reg-senha" placeholder="Mínimo 6 caracteres">
+        </div>
+
+        <button class="btn-reg" id="btnRegistrar">CADASTRAR AGORA</button>
+
+        <div class="footer-link">
+            Já tem uma conta? <a href="index.html">Fazer Login</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, increment, getDoc, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+    authDomain: "monety-site-9175f.firebaseapp.com",
+    projectId: "monety-site-9175f",
+    storageBucket: "monety-site-9175f.firebasestorage.app",
+    messagingSenderId: "840821848803",
+    appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Captura o link de indicação (Referência)
+        const urlParams = new URLSearchParams(window.location.search);
+        let indicadoPor = urlParams.get('ref');
+        if (indicadoPor) {
+            localStorage.setItem('padrinho', indicadoPor);
+        } else {
+            indicadoPor = localStorage.getItem('padrinho');
+        }
+
+        document.getElementById('btnRegistrar').addEventListener('click', async () => {
+            const nome = document.getElementById('reg-nome').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const senha = document.getElementById('reg-senha').value;
+            const btn = document.getElementById('btnRegistrar');
+
+            if (!nome || !email || senha.length < 6) {
+                return Swal.fire({
+                    icon: 'warning',
+                    title: 'Dados Incompletos',
+                    text: 'Preencha todos os campos corretamente.',
+                    background: '#1a0505',
+                    color: '#fff',
+                    confirmButtonColor: '#e74c3c'
+                });
+            }
+
+            btn.disabled = true;
+            Swal.fire({
+                title: 'Criando sua conta...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); },
+                background: '#1a0505',
+                color: '#fff'
+            });
+
+            try {
+                // --- BUSCA VALOR DO BÔNUS CONFIGURADO NO PAINEL MASTER ---
+                let saldoInicial = 0;
+                try {
+                    const bonusSnap = await getDoc(doc(db, "configuracoes", "bonus_cadastro"));
+                    if (bonusSnap.exists()) {
+                        saldoInicial = Number(bonusSnap.data().valor) || 0;
+                    }
+                } catch (e) { console.error("Erro ao buscar bônus:", e); }
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                const user = userCredential.user;
+
+                let paiId = indicadoPor || null;
+                let avoId = null;
+                let bisavoId = null;
+
+                // --- LÓGICA DE LINHAGEM (SISTEMA DE 3 NÍVEIS) ---
+                if (paiId) {
+                    try {
+                        const paiSnap = await getDoc(doc(db, "usuarios", paiId));
+                        if (paiSnap.exists()) {
+                            const paiData = paiSnap.data();
+                            
+                            // Define quem são os níveis acima com base no pai
+                            avoId = paiData.indicadoPor || null;
+                            bisavoId = paiData.indicadoPorAvo || null;
+
+                            // 1. Atualiza contador do PAI (1º Nível)
+                            await updateDoc(doc(db, "usuarios", paiId), {
+                                indicadosCount: increment(1)
+                            });
+
+                            // 2. Atualiza contador do AVÔ (2º Nível)
+                            if (avoId) {
+                                await updateDoc(doc(db, "usuarios", avoId), {
+                                    indicadosL2Count: increment(1)
+                                });
+                            }
+
+                            // 3. Atualiza contador do BISAVÔ (3º Nível)
+                            if (bisavoId) {
+                                await updateDoc(doc(db, "usuarios", bisavoId), {
+                                    indicadosL3Count: increment(1)
+                                });
+                            }
+                        }
+                    } catch (e) { console.error("Erro na linhagem:", e); }
+                }
+
+                // Salva o novo usuário com a árvore completa e SALDO DE BÔNUS
+                // IMPORTANTE: saldoLucro inicia em 0 para garantir a separação
+                await setDoc(doc(db, "usuarios", user.uid), {
+                    nome: nome,
+                    email: email,
+                    saldo: saldoInicial, // Bônus entra no saldo de investimento
+                    saldoLucro: 0,      // Saldo sacável começa zerado
+                    totalGanhos: 0,
+                    totalComissoes: 0,
+                    indicadosCount: 0,   
+                    indicadosL2Count: 0, 
+                    indicadosL3Count: 0, 
+                    indicadoPor: paiId,        
+                    indicadoPorAvo: avoId,     
+                    indicadoPorBisavo: bisavoId, 
+                    uid: user.uid,
+                    status: "ativo",
+                    dataCriacao: new Date().toISOString()
+                });
+
+      // --- REGISTRA O BÔNUS NO HISTÓRICO PARA O USUÁRIO VER ---
+if (saldoInicial > 0) {
+    await addDoc(collection(db, "historico"), {
+        userId: user.uid,
+        valor: saldoInicial,
+        tipo: 'Bônus',
+        descricao: 'Presente de Boas-Vindas',
+        data: Timestamp.now()
+    });
+}
+
+localStorage.removeItem('padrinho');
+
+// --- ALERTA DE SUCESSO CORRIGIDO ---
+await Swal.fire({
+    icon: 'success',
+    title: 'Conta Criada!',
+    // Mudamos de > 10 para >= 10 para aparecer a mensagem dos R$ 10,00
+    text: saldoInicial >= 10 
+        ? `Você ganhou R$ ${saldoInicial.toFixed(2)} de bônus!` 
+        : 'Seja bem-vindo à ByteWay!',
+    background: '#1a0505',
+    color: '#fff',
+    showConfirmButton: false,
+    timer: 2000
+});
+
+                window.location.href = "home.html";
+
+            } catch (error) {
+                btn.disabled = false;
+                let msg = "Erro ao criar conta.";
+                if (error.code === 'auth/email-already-in-use') msg = "E-mail já cadastrado.";
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: msg,
+                    background: '#1a0505',
+                    color: '#fff'
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #1a0505 0%, #000000 100%);
+            --card-glass: rgba(255, 255, 255, 0.05);
+            --red: #e74c3c;
+            --white: #ffffff;
+        }
+
+        /* REMOVENDO O CONTORNO AZUL DE SELEÇÃO E FOCO */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+            outline: none !important; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            background: var(--bg-gradient);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 40px 30px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .logo span { color: var(--red); }
+
+        p { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 30px; }
+
+        .input-group { position: relative; margin-bottom: 20px; }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.4);
+            transition: 0.3s;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        /* Destaque em vermelho ao focar no campo */
+        input:focus { 
+            border-color: var(--red); 
+            background: rgba(231, 76, 60, 0.05); 
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.2);
+        }
+        
+        input:focus + i {
+            color: var(--red);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: var(--red);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-login:active { transform: scale(0.98); }
+
+        .footer-links { margin-top: 25px; font-size: 0.85rem; }
+        .footer-links a { color: var(--red); text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo"><span>Nex</span>us</div>
+        <p>Acesse sua conta para investir</p>
+
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Seu e-mail">
+            <i class="fas fa-envelope"></i>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Sua senha">
+            <i class="fas fa-lock"></i>
+        </div>
+
+        <button class="btn-login" id="btnLogin">ENTRAR AGORA</button>
+
+        <div class="footer-links">
+            Não tem uma conta? <a href="registro.html">Cadastre-se</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+    authDomain: "monety-site-9175f.firebaseapp.com",
+    projectId: "monety-site-9175f",
+    storageBucket: "monety-site-9175f.firebasestorage.app",
+    messagingSenderId: "840821848803",
+    appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById('btnLogin').addEventListener('click', async () => {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btnLogin');
+
+            if(!email || !password) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Dados incompletos',
+                    text: 'Preencha seu e-mail e senha.',
+                    background: '#1a0505',
+                    color: '#fff',
+                    confirmButtonColor: '#e74c3c'
+                });
+                return;
+            }
+
+            btn.disabled = true;
+            Swal.fire({
+                title: 'Entrando...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); },
+                background: '#1a0505',
+                color: '#fff'
+            });
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Acesso autorizado!',
+                    showConfirmButton: false,
+                    timer: 1200,
+                    background: '#1a0505',
+                    color: '#fff'
+                });
+
+                setTimeout(() => {
+                    window.location.href = "home.html";
+                }, 1200);
+
+            } catch (error) {
+                btn.disabled = false;
+                let mensagem = "Verifique seus dados e tente novamente.";
+                
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    mensagem = "E-mail ou senha inválidos.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    mensagem = "Muitas tentativas. Tente mais tarde.";
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Falha no acesso',
+                    text: mensagem,
+                    background: '#1a0505',
+                    color: '#fff',
+                    confirmButtonColor: '#e74c3c'
+                });
+            }
+        });
+    </script>
+</body>
+</html>

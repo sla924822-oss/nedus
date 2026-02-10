@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início - Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #1a0505 0%, #000000 100%);
+            --card: rgba(255, 255, 255, 0.05);
+            --red: #e74c3c;
+            --green: #2ecc71;
+            --gold: #FFD700;
+            --telegram: #0088cc;
+        }
+
+        /* REMOVENDO O CONTORNO AZUL DE SELEÇÃO E FOCO */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+            outline: none !important; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body { background: var(--bg); color: white; padding-bottom: 110px; min-height: 100vh; overflow-x: hidden; }
+
+        /* MURAL DE AVISO DINÂMICO */
+        #container-aviso {
+            display: none;
+            margin: 10px 20px;
+            padding: 15px;
+            background: rgba(231, 76, 60, 0.15);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 15px;
+            color: #fff;
+            font-size: 0.85rem;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        /* Top Bar */
+        .top-bar { padding: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-home { font-weight: 700; font-size: 1.2rem; letter-spacing: -1px; }
+        .logo-home span { color: var(--red); }
+        .user-greeting h2 { font-size: 1.1rem; text-transform: capitalize; }
+
+        /* Portfolio Card */
+        .portfolio-card { 
+            margin: 0 20px; background: var(--card); border-radius: 25px; 
+            padding: 25px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        .portfolio-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+        .portfolio-header small { color: #888; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 1px; }
+        .balance-main { font-size: 2.2rem; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .stat-item { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.03); }
+        .stat-item span { display: block; font-size: 0.65rem; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-item strong { font-size: 0.95rem; color: #fff; }
+
+        /* VIP Badges */
+        .vip-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 50px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }
+        .vip-bronze { background: #3d1a1a; color: #ff9999; }
+        .vip-ouro { background: linear-gradient(90deg, #ffd700, #b8860b); color: #000; }
+        .vip-diamante { background: linear-gradient(90deg, #e5e4e2, #7f8c8d); color: #000; }
+
+        /* Botões de Ação */
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .action-btn { background: var(--card); border-radius: 18px; padding: 18px; text-align: center; color: white; text-decoration: none; border: 1px solid rgba(255,255,255,0.05); }
+        .action-btn i { font-size: 1.6rem; margin-bottom: 10px; display: block; color: var(--red); }
+
+        /* Listas de Investimentos */
+        .plans-stack { padding: 15px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .active-plan-item { background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); border-radius: 22px; padding: 18px; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; overflow: hidden; }
+        .plan-progress-bg { height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; width: 100%; margin-top: 10px; }
+        
+        .plan-progress-bar { 
+            height: 100%; background: var(--red); border-radius: 10px; 
+            box-shadow: 0 0 10px var(--red); 
+            transition: width 1s linear;
+        }
+
+        /* Telegram Button */
+        .btn-tg {
+            position: fixed; bottom: 85px; right: 20px; background: var(--telegram);
+            width: 50px; height: 50px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; color: white;
+            font-size: 1.5rem; z-index: 999; text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        /* Social Pop */
+        .social-pop { position: fixed; bottom: 85px; left: 20px; right: 80px; background: white; color: #333; padding: 12px 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9998; transform: translateX(-150%); transition: 0.5s ease-in-out; }
+        .social-pop.show { transform: translateX(0); }
+
+        /* Nav Bottom COM EFEITO VIDRO VERMELHO NO ATIVO */
+        .nav-bottom { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            background: rgba(0, 0, 0, 0.9); 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 12px 0; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+            backdrop-filter: blur(10px);
+        }
+        .nav-item { 
+            color: #555; 
+            text-align: center; 
+            text-decoration: none; 
+            font-size: 0.7rem; 
+            padding: 8px 12px;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+        .nav-item i { display: block; font-size: 1.3rem; margin-bottom: 5px; }
+
+        .nav-item.active { 
+            color: #fff; 
+            background: rgba(231, 76, 60, 0.2); 
+            border: 1px solid rgba(231, 76, 60, 0.4);
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.2);
+        }
+        .nav-item.active i { color: var(--red); }
+    </style>
+</head>
+<body>
+
+    <a href="https://t.me/+Z6pv35vKSuA4MDhh" target="_blank" class="btn-tg"><i class="fab fa-telegram-plane"></i></a>
+
+    <div id="social-pop" class="social-pop">
+        <i class="fas fa-check-circle" style="color: #2ecc71;"></i>
+        <p id="social-content" style="font-size: 0.75rem;"></p>
+    </div>
+
+    <div id="container-aviso" class="animate__animated animate__fadeInDown">
+        <i class="fas fa-bullhorn" style="margin-right: 8px; color: var(--red);"></i>
+        <span id="texto-aviso"></span>
+    </div>
+
+    <div class="top-bar">
+        <div class="user-greeting">
+            <div class="logo-home"><span>Nex</span>us</div>
+            <h2 id="home-nome">Carregando...</h2>
+        </div>
+        <a href="perfil.html" style="color:white; font-size: 1.5rem;"><i class="fas fa-user-circle"></i></a>
+    </div>
+
+    <div class="portfolio-card">
+        <div class="portfolio-header">
+            <div id="vip-tag" class="vip-badge vip-bronze">
+                <i class="fas fa-crown"></i> <span id="vip-nome">VIP Bronze</span>
+            </div>
+            <br><small>Saldo Total Conta</small>
+            <div class="balance-main">
+                <span id="home-saldo">R$ 0,00</span>
+                <i class="fas fa-eye" id="toggle-balance" style="font-size: 1.2rem; color: rgba(255,255,255,0.2); cursor: pointer;"></i>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-item"><span>Total Investido</span><strong id="stat-investido">R$ 0,00</strong></div>
+            <div class="stat-item"><span>Total Ganhos</span><strong id="stat-ganhos" style="color:var(--green)">R$ 0,00</strong></div>
+            <div class="stat-item"><span>Para Investir</span><strong id="stat-investir">R$ 0,00</strong></div>
+            <div class="stat-item"><span>Para Saque</span><strong id="stat-saque">R$ 0,00</strong></div>
+        </div>
+    </div>
+
+    <div class="actions-grid">
+        <a href="deposito.html" class="action-btn"><i class="fas fa-wallet"></i>Depositar</a>
+        <a href="saque.html" class="action-btn"><i class="fas fa-hand-holding-usd"></i>Sacar</a>
+    </div>
+
+    <h3 style="padding: 0 25px; font-size: 0.8rem; color: #666; text-transform: uppercase; font-weight: 700;">Meus Investimentos</h3>
+    <div id="lista-investimentos" class="plans-stack"></div>
+
+    <nav class="nav-bottom">
+        <a href="home.html" class="nav-item active"><i class="fas fa-home"></i>Início</a>
+        <a href="planos.html" class="nav-item"><i class="fas fa-chart-pie"></i>Planos</a>
+        <a href="indicacao.html" class="nav-item"><i class="fas fa-share-alt"></i>Indicar</a>
+        <a href="perfil.html" class="nav-item"><i class="fas fa-user-alt"></i>Perfil</a>
+    </nav>
+
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, updateDoc, addDoc, Timestamp, increment, onSnapshot, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+    authDomain: "monety-site-9175f.firebaseapp.com",
+    projectId: "monety-site-9175f",
+    storageBucket: "monety-site-9175f.firebasestorage.app",
+    messagingSenderId: "840821848803",
+    appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// --- UTILITÁRIOS ---
+let saldoVisivel = localStorage.getItem('saldoVisivel') !== 'false';
+
+function formatarMoeda(valor) {
+    if (!saldoVisivel) return "R$ ******";
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
+}
+
+// --- SISTEMA DE NOTIFICAÇÕES (SOCIAL PROOF) ---
+const nomes_pop = ["Marcos S.", "Julia R.", "Phelipe A.", "Ana Paula", "Bruno K.", "Carlos G.", "Diego M."];
+const tipos_pop = ["acabou de sacar", "recebeu lucro de", "ativou um novo plano"];
+function showPop() {
+    const pop = document.getElementById('social-pop');
+    const content = document.getElementById('social-content');
+    if(!pop || !content) return;
+    const nome = nomes_pop[Math.floor(Math.random()*nomes_pop.length)];
+    const tipo = tipos_pop[Math.floor(Math.random()*tipos_pop.length)];
+    const valor = (Math.random() * (450 - 30) + 30).toFixed(2);
+    content.innerHTML = `<b>${nome}</b> ${tipo} <span style="color:#2ecc71; font-weight:700">R$ ${valor}</span>`;
+    pop.classList.add('show');
+    setTimeout(() => pop.classList.remove('show'), 4000);
+}
+setInterval(showPop, 12000);
+
+// --- MURAL DE AVISO ---
+async function carregarAviso() {
+    try {
+        const docRef = doc(db, "configuracoes", "aviso_global");
+        const snap = await getDoc(docRef);
+        if (snap.exists() && snap.data().texto.trim() !== "") {
+            document.getElementById('texto-aviso').innerText = snap.data().texto;
+            document.getElementById('container-aviso').style.display = 'block';
+        }
+    } catch (e) { console.error("Erro aviso:", e); }
+}
+
+// --- ANIMAÇÃO DE PROGRESSO ---
+function iniciarAnimacaoProgresso() {
+    const interval = setInterval(() => {
+        const agora = new Date().getTime();
+        const bars = document.querySelectorAll('.progress-timer');
+        if (bars.length === 0) return;
+        
+        bars.forEach(bar => {
+            const inicio = parseInt(bar.getAttribute('data-inicio'));
+            const fim = bar.getAttribute('data-fim');
+            if (fim) {
+                const total = parseInt(fim) - inicio;
+                const decorrido = agora - inicio;
+                let percentagem = (decorrido / total) * 100;
+                bar.style.width = Math.min(100, Math.max(0, percentagem)).toFixed(4) + '%';
+            }
+        });
+    }, 1000);
+}
+
+// --- ESCUTA EM TEMPO REAL (CORAÇÃO DO CÓDIGO) ---
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Escuta mudanças no documento do usuário (Saldo, Nome, etc)
+        onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
+            if (docSnap.exists()) {
+                const userData = docSnap.data();
+                if (userData.status === "bloqueado") {
+                    signOut(auth).then(() => window.location.href = "login.html?error=blocked");
+                    return;
+                }
+                
+                // 1. Atualiza Nome e Saldo Imediatamente
+                document.getElementById('home-nome').innerText = `Olá, ${userData.nome || "Investidor"}`;
+                
+                const saldoPrincipal = Number(userData.saldo) || 0;
+                const saldoLucro = Number(userData.saldoLucro) || 0;
+                const totalGanhos = Number(userData.totalGanhos) || 0;
+                const saldoTotal = saldoPrincipal + saldoLucro;
+
+                const atualizarElementosSaldo = () => {
+                    document.getElementById('home-saldo').innerText = formatarMoeda(saldoTotal);
+                    document.getElementById('stat-ganhos').innerText = formatarMoeda(totalGanhos);
+                    document.getElementById('stat-investir').innerText = formatarMoeda(saldoPrincipal);
+                    document.getElementById('stat-saque').innerText = formatarMoeda(saldoLucro);
+                    document.getElementById('toggle-balance').className = saldoVisivel ? "fas fa-eye" : "fas fa-eye-slash";
+                };
+
+                atualizarElementosSaldo();
+
+                // Toggle de visibilidade
+                document.getElementById('toggle-balance').onclick = () => {
+                    saldoVisivel = !saldoVisivel;
+                    localStorage.setItem('saldoVisivel', saldoVisivel);
+                    atualizarElementosSaldo();
+                    // Atualiza também o total investido que é carregado depois
+                    carregarInvestimentos(user.uid);
+                };
+
+                // 2. Dispara funções secundárias
+                carregarInvestimentos(user.uid);
+                carregarAviso();
+                
+                // Só processa lucros e boas-vindas uma vez por sessão para não travar a UI
+                if (!window.processamentoInicialRealizado) {
+                    window.processamentoInicialRealizado = true;
+                    processarLogicaNegocio(user.uid, userData);
+                }
+            }
+        });
+    } else {
+        window.location.href = "login.html";
+    }
+});
+
+async function carregarInvestimentos(uid) {
+    try {
+        const q = query(collection(db, "investimentos"), where("userId", "==", uid), where("status", "==", "ativo"));
+        const snap = await getDocs(q);
+        let totalInvestido = 0;
+        let htmlContent = "";
+        const agora = new Date();
+
+        snap.forEach(docInv => {
+            const inv = docInv.data();
+            totalInvestido += Number(inv.valor || 0);
+            
+            const dataCriacao = inv.timestamp?.toDate() || agora;
+            const dataExpiracao = inv.dataExpiracao?.toDate();
+            let progresso = 0;
+            if (dataExpiracao) {
+                progresso = Math.min(100, Math.max(0, ((agora - dataCriacao) / (dataExpiracao - dataCriacao)) * 100));
+            }
+
+            htmlContent += `
+                <div class="active-plan-item animate__animated animate__fadeInUp">
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <div>
+                            <h4 style="font-size:0.95rem; font-weight:700"><i class="fas fa-layer-group" style="color:var(--red); margin-right:5px;"></i> ${inv.plano}</h4>
+                            <small style="color:var(--green); font-weight:600"><i class="fas fa-arrow-up"></i> + ${formatarMoeda(inv.rendimentoDiario)} / dia</small>
+                        </div>
+                        <div style="text-align:right">
+                            <strong style="font-size:1rem">${formatarMoeda(inv.valor)}</strong>
+                            <br><small style="color:#888; font-size:0.6rem; text-transform:uppercase">Investido</small>
+                        </div>
+                    </div>
+                    <div class="plan-progress-bg">
+                        <div class="plan-progress-bar progress-timer" 
+                             data-inicio="${dataCriacao.getTime()}" 
+                             data-fim="${dataExpiracao ? dataExpiracao.getTime() : ''}" 
+                             style="width:${progresso}%">
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        document.getElementById('lista-investimentos').innerHTML = htmlContent || '<p style="text-align:center; color:#444; font-size:0.85rem; margin-top:20px;">Nenhum investimento ativo.</p>';
+        document.getElementById('stat-investido').innerText = formatarMoeda(totalInvestido);
+        
+        // Atualiza Badge VIP
+        const vipTag = document.getElementById('vip-tag');
+        const vipNome = document.getElementById('vip-nome');
+        if (totalInvestido >= 2000) { vipTag.className = "vip-badge vip-diamante"; vipNome.innerText = "VIP Diamante"; }
+        else if (totalInvestido >= 500) { vipTag.className = "vip-badge vip-ouro"; vipNome.innerText = "VIP Ouro"; }
+        else { vipTag.className = "vip-badge vip-bronze"; vipNome.innerText = "VIP Bronze"; }
+
+    } catch (e) { console.error("Erro investimentos:", e); }
+}
+
+async function processarLogicaNegocio(uid, userData) {
+    // 1. Verificar boas vindas
+    if (!sessionStorage.getItem('notificacaoBoasVindas')) {
+        await Swal.fire({
+            title: `<span style="color: #e74c3c;">Nexus</span> Intelligence`,
+            html: `<p style="color: #aaa; font-size: 0.9rem;">Bem-vindo de volta, <b>${userData.nome}</b>!<br>Seus rendimentos são processados a cada 24h.</p>`,
+            background: '#120303',
+            color: '#fff',
+            confirmButtonText: 'ACESSAR PAINEL',
+            confirmButtonColor: '#e74c3c',
+            borderRadius: '25px'
+        });
+        sessionStorage.setItem('notificacaoBoasVindas', 'true');
+    }
+
+    // 2. Logica de lucros diários (só roda uma vez ao entrar)
+    try {
+        const q = query(collection(db, "investimentos"), where("userId", "==", uid), where("status", "==", "ativo"));
+        const snap = await getDocs(q);
+        const agora = new Date();
+        const vinteQuatroHoras = 24 * 60 * 60 * 1000;
+        let ganhosParaCreditar = 0;
+        const updates = [];
+
+        for (const docInv of snap.docs) {
+            const inv = docInv.data();
+            const dataCriacao = inv.timestamp.toDate();
+            const dataReferencia = inv.ultimoPagamento ? inv.ultimoPagamento.toDate() : dataCriacao;
+            const diff = agora.getTime() - dataReferencia.getTime();
+
+            if (diff >= vinteQuatroHoras) {
+                const ciclos = Math.floor(diff / vinteQuatroHoras);
+                ganhosParaCreditar += (Number(inv.rendimentoDiario) * ciclos);
+                const novoHorarioFixo = Timestamp.fromMillis(dataReferencia.getTime() + (ciclos * vinteQuatroHoras));
+                updates.push(updateDoc(doc(db, "investimentos", docInv.id), { ultimoPagamento: novoHorarioFixo }));
+            }
+        }
+
+        if (ganhosParaCreditar > 0) {
+            await updateDoc(doc(db, "usuarios", uid), {
+                saldoLucro: increment(ganhosParaCreditar),
+                totalGanhos: increment(ganhosParaCreditar)
+            });
+            await addDoc(collection(db, "historico"), {
+                userId: uid, valor: ganhosParaCreditar, tipo: 'Rendimento', data: Timestamp.now()
+            });
+            Swal.fire({ title: 'Lucros Creditados!', text: `R$ ${ganhosParaCreditar.toFixed(2)} adicionados ao seu saldo.`, icon: 'success' });
+        }
+        
+        if (updates.length > 0) await Promise.all(updates);
+        iniciarAnimacaoProgresso();
+
+    } catch (e) { console.error("Erro lucro:", e); }
+}
+    </script>
+</body>
+</html>

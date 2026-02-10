@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - Restrito</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --bg: #0f0505;
+            --card: #1a1a1a;
+            --red: #e74c3c;
+            --green: #2ecc71;
+            --gold: #FFD700;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; 
+            outline: none !important; -webkit-tap-highlight-color: transparent;
+        }
+
+        body { background: var(--bg); color: white; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .admin-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
+        }
+        
+        h1 { font-size: 1.5rem; color: var(--red); }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card); padding: 20px; border-radius: 15px;
+            border: 1px solid var(--border); text-align: center;
+        }
+        .stat-card i { font-size: 1.5rem; color: var(--red); margin-bottom: 10px; }
+        .stat-card h2 { font-size: 1.4rem; margin-bottom: 5px; }
+        .stat-card p { font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: bold; }
+
+        .admin-section {
+            background: var(--card); border-radius: 15px; border: 1px solid var(--border);
+            padding: 20px; margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1rem; color: var(--gold); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .search-group, .notice-group { display: flex; gap: 10px; margin-bottom: 20px; }
+
+        input, textarea {
+            flex: 1; padding: 12px 15px; background: #000; border: 1px solid var(--border);
+            border-radius: 10px; color: white; transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: var(--red); box-shadow: 0 0 10px rgba(231, 76, 60, 0.2); }
+
+        .btn {
+            padding: 12px 20px; border: none; border-radius: 10px; font-weight: bold;
+            cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-search { background: var(--red); color: white; }
+        .btn-add { background: var(--green); color: white; }
+        .btn-ban { background: #555; color: white; }
+        .btn-ban.active { background: var(--red); }
+        
+        .btn:active { transform: scale(0.96); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        #user-result {
+            background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px;
+            display: none; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; font-size: 0.75rem; color: #555; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+
+        .status-badge { padding: 4px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; }
+        .status-ativo { background: rgba(46, 204, 113, 0.2); color: var(--green); }
+        .status-bloqueado { background: rgba(231, 76, 60, 0.2); color: var(--red); }
+
+        /* Oculto por padrão para segurança visual */
+        #admin-panel { display: none; }
+        #access-denied { display: none; text-align: center; margin-top: 100px; }
+    </style>
+</head>
+<body>
+
+    <div id="loading" style="text-align: center; margin-top: 100px;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--red);"></i>
+        <p style="margin-top:15px;">Validando credenciais Master...</p>
+    </div>
+
+    <div id="access-denied">
+        <i class="fas fa-user-lock" style="font-size: 3rem; color: var(--red); margin-bottom: 20px;"></i>
+        <h1>Acesso Negado</h1>
+        <p>Apenas o administrador master pode acessar esta área.</p><br>
+        <a href="login.html" style="color: var(--red); text-decoration: none; font-weight: bold;">Voltar para o Início</a>
+    </div>
+
+    <div id="admin-panel" class="container">
+        <div class="admin-header">
+            <h1><i class="fas fa-user-shield"></i> Painel Master ByteWay</h1>
+            <span style="font-size: 0.8rem; color: var(--green); font-weight: bold;"><i class="fas fa-circle"></i> Sistema Online</span>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-title"><i class="fas fa-bullhorn"></i> Mural de Avisos Global</div>
+            <div class="notice-group">
+                <textarea id="input-aviso" placeholder="Digite uma mensagem para todos os usuários..."></textarea>
+                <button class="btn btn-search" id="btn-publicar-aviso">PUBLICAR MENSAGEM</button>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-title"><i class="fas fa-gift"></i> Configurar Bônus de Novo Cadastro</div>
+            <div class="notice-group">
+                <input type="number" id="input-bonus-valor" placeholder="Valor em R$ (Ex: 10.00)" step="0.01">
+                <button class="btn btn-add" id="btn-salvar-bonus">DEFINIR BÔNUS</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-vault"></i>
+                <h2 id="stat-saldo-total">R$ 0,00</h2>
+                <p>Total em Contas</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-hand-holding-dollar"></i>
+                <h2 id="stat-saques-pendentes">R$ 0,00</h2>
+                <p>Saques para Pagar</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <h2 id="stat-total-usuarios">0</h2>
+                <p>Total Clientes</p>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-title"><i class="fas fa-user-edit"></i> Buscar e Editar Usuário</div>
+            <div class="search-group">
+                <input type="email" id="search-email" placeholder="E-mail exato do usuário...">
+                <button class="btn btn-search" id="btn-search-user">LOCALIZAR</button>
+            </div>
+
+            <div id="user-result">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <p id="res-nome" style="font-weight: bold; font-size: 1.1rem;"></p>
+                        <p id="res-email" style="color: #888; font-size: 0.8rem; margin-bottom: 10px;"></p>
+                        <span id="res-status-badge" class="status-badge">ATIVO</span>
+                        <p style="margin-top: 15px;">Saldo Atual: <span id="res-saldo" style="color: var(--gold); font-weight: bold; font-size: 1.2rem;">R$ 0,00</span></p>
+                    </div>
+                    <div style="text-align: right; min-width: 220px;">
+                        <input type="number" id="input-new-amount" placeholder="Valor R$" style="width: 100%; margin-bottom: 10px;">
+                        <button class="btn btn-add" id="btn-update-balance" style="width: 100%; justify-content: center; margin-bottom: 10px;">ATUALIZAR SALDO</button>
+                        <button class="btn btn-ban" id="btn-toggle-ban" style="width: 100%; justify-content: center;">BANIR/DESBANIR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-title"><i class="fas fa-users-viewfinder"></i> Últimos Usuários Cadastrados</div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>Status</th><th>E-mail</th><th>Saldo</th><th>Ação</th></tr></thead>
+                    <tbody id="lista-usuarios-recentes"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-title"><i class="fas fa-hand-holding-usd"></i> Solicitações de Saque (Pendentes)</div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>Data</th><th>Chave PIX</th><th>Valor Líquido</th><th>Ação</th></tr></thead>
+                    <tbody id="lista-saques"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, doc, updateDoc, getDoc, setDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+            authDomain: "monety-site-9175f.firebaseapp.com",
+            projectId: "monety-site-9175f",
+            storageBucket: "monety-site-9175f.firebasestorage.app",
+            messagingSenderId: "840821848803",
+            appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const ADMIN_EMAIL = "lipedosantos2008@gmail.com";
+        const URL_PIPEDREAM_PAYOUT = "https://eottot41sx25yyz.m.pipedream.net"; 
+        
+        let userEncontradoId = null;
+        let userStatusAtual = "ativo";
+
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#1a1a1a', color: '#fff'
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            const loading = document.getElementById('loading');
+            const adminPanel = document.getElementById('admin-panel');
+            const deniedDiv = document.getElementById('access-denied');
+
+            if (user) {
+                if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                    loading.style.display = 'none';
+                    deniedDiv.style.display = 'none';
+                    adminPanel.style.display = 'block'; 
+                    carregarDadosIniciais();
+                } else {
+                    loading.style.display = 'none';
+                    if(adminPanel) adminPanel.remove();
+                    deniedDiv.style.display = 'block';
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        function carregarDadosIniciais() {
+            carregarSaquesPendentes();
+            carregarEstatisticasGerais();
+            carregarUsuariosNaTabela();
+            carregarAvisoConfig();
+            carregarBonusConfig();
+        }
+
+        async function carregarAvisoConfig() {
+            try {
+                const snap = await getDoc(doc(db, "configuracoes", "aviso_global"));
+                if (snap.exists()) document.getElementById('input-aviso').value = snap.data().texto || "";
+            } catch(e) {}
+        }
+
+        document.getElementById('btn-publicar-aviso').addEventListener('click', async () => {
+            const texto = document.getElementById('input-aviso').value;
+            try {
+                await setDoc(doc(db, "configuracoes", "aviso_global"), { texto, data: new Date() });
+                Toast.fire({ icon: 'success', title: 'Mensagem publicada!' });
+            } catch (e) { Toast.fire({ icon: 'error', title: 'Falha ao salvar' }); }
+        });
+
+        async function carregarBonusConfig() {
+            try {
+                const snap = await getDoc(doc(db, "configuracoes", "bonus_cadastro"));
+                if (snap.exists()) document.getElementById('input-bonus-valor').value = snap.data().valor || 0;
+            } catch(e) {}
+        }
+
+        document.getElementById('btn-salvar-bonus').addEventListener('click', async () => {
+            const valor = parseFloat(document.getElementById('input-bonus-valor').value);
+            if (isNaN(valor)) return Toast.fire({ icon: 'error', title: 'Valor inválido' });
+            try {
+                await setDoc(doc(db, "configuracoes", "bonus_cadastro"), { valor: valor, atualizadoEm: new Date() });
+                Toast.fire({ icon: 'success', title: 'Bônus atualizado!' });
+            } catch (e) { Toast.fire({ icon: 'error', title: 'Erro ao salvar' }); }
+        });
+
+        document.getElementById('btn-search-user').addEventListener('click', async () => {
+            const email = document.getElementById('search-email').value.trim();
+            if (!email) return;
+            const q = query(collection(db, "usuarios"), where("email", "==", email));
+            const snap = await getDocs(q);
+            if (snap.empty) return Swal.fire({ icon: 'error', title: 'Usuário não encontrado', background: '#1a1a1a', color: '#fff' });
+            const data = snap.docs[0].data();
+            userEncontradoId = snap.docs[0].id;
+            userStatusAtual = data.status || "ativo";
+            document.getElementById('res-nome').innerText = data.nome || "Sem Nome";
+            document.getElementById('res-email').innerText = data.email;
+            document.getElementById('res-saldo').innerText = `R$ ${parseFloat(data.saldo || 0).toFixed(2)}`;
+            const badge = document.getElementById('res-status-badge');
+            badge.innerText = userStatusAtual.toUpperCase();
+            badge.className = `status-badge status-${userStatusAtual}`;
+            const btnBan = document.getElementById('btn-toggle-ban');
+            btnBan.innerText = userStatusAtual === "ativo" ? "BANIR USUÁRIO" : "REATIVAR USUÁRIO";
+            btnBan.className = `btn btn-ban ${userStatusAtual === "ativo" ? 'active' : ''}`;
+            document.getElementById('user-result').style.display = 'block';
+        });
+
+        document.getElementById('btn-toggle-ban').addEventListener('click', async () => {
+            const novoStatus = userStatusAtual === "ativo" ? "bloqueado" : "ativo";
+            const confirm = await Swal.fire({ title: 'Confirmar?', text: `Mudar status para ${novoStatus}?`, icon: 'warning', showCancelButton: true, background: '#1a1a1a', color: '#fff' });
+            if (!confirm.isConfirmed) return;
+            await updateDoc(doc(db, "usuarios", userEncontradoId), { status: novoStatus });
+            document.getElementById('btn-search-user').click();
+            carregarUsuariosNaTabela();
+            Toast.fire({ icon: 'success', title: 'Status atualizado!' });
+        });
+
+        document.getElementById('btn-update-balance').addEventListener('click', async () => {
+            const valorAdicionar = parseFloat(document.getElementById('input-new-amount').value);
+            if (isNaN(valorAdicionar)) return;
+            const ref = doc(db, "usuarios", userEncontradoId);
+            const userSnap = await getDoc(ref);
+            const novoSaldo = (parseFloat(userSnap.data().saldo) || 0) + valorAdicionar;
+            await updateDoc(ref, { saldo: novoSaldo });
+            document.getElementById('btn-search-user').click();
+            carregarEstatisticasGerais();
+            Toast.fire({ icon: 'success', title: 'Saldo atualizado!' });
+        });
+
+        async function carregarEstatisticasGerais() {
+            try {
+                const snapUsers = await getDocs(collection(db, "usuarios"));
+                let totalSaldos = 0;
+                snapUsers.forEach(d => totalSaldos += parseFloat(d.data().saldo || 0));
+                
+                const qSaques = query(collection(db, "saques"), where("status", "==", "pendente"));
+                const snapSaques = await getDocs(qSaques);
+                let totalSaquesP = 0;
+                snapSaques.forEach(d => totalSaquesP += parseFloat(d.data().valorReceber || 0));
+                
+                document.getElementById('stat-saldo-total').innerText = `R$ ${totalSaldos.toFixed(2)}`;
+                document.getElementById('stat-saques-pendentes').innerText = `R$ ${totalSaquesP.toFixed(2)}`;
+                document.getElementById('stat-total-usuarios').innerText = snapUsers.size;
+            } catch(e) {}
+        }
+
+        async function carregarUsuariosNaTabela() {
+            try {
+                const q = query(collection(db, "usuarios"), limit(15));
+                const snapshot = await getDocs(q);
+                const body = document.getElementById('lista-usuarios-recentes');
+                body.innerHTML = "";
+                snapshot.forEach(docSnap => {
+                    const u = docSnap.data();
+                    const status = u.status || "ativo";
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td><span class="status-badge status-${status}">${status}</span></td><td>${u.email}</td><td style="color:var(--gold)">R$ ${parseFloat(u.saldo || 0).toFixed(2)}</td><td><button class="btn-ban" style="padding:4px;" id="view-${docSnap.id}">VER</button></td>`;
+                    body.appendChild(tr);
+                    document.getElementById(`view-${docSnap.id}`).onclick = () => {
+                        document.getElementById('search-email').value = u.email;
+                        document.getElementById('btn-search-user').click();
+                        window.scrollTo({ top: 300, behavior: 'smooth' });
+                    };
+                });
+            } catch(e) {}
+        }
+
+        async function carregarSaquesPendentes() {
+            const lista = document.getElementById('lista-saques');
+            try {
+                const q = query(collection(db, "saques"), where("status", "==", "pendente"));
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    lista.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhum saque pendente encontrado.</td></tr>";
+                    return;
+                }
+
+                lista.innerHTML = "";
+                snapshot.forEach(docSnap => {
+                    const s = docSnap.data();
+                    const id = docSnap.id;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${s.data || '---'}</td>
+                        <td><small>${s.chavePix || 'Não informada'}</small></td>
+                        <td style="color:var(--green); font-weight:bold;">R$ ${parseFloat(s.valorReceber || 0).toFixed(2)}</td>
+                        <td><button class="btn btn-add" style="padding:6px; font-size:11px;" id="btn-pay-${id}">PAGAR VIA PIPEDREAM</button></td>
+                    `;
+                    lista.appendChild(tr);
+
+                    document.getElementById(`btn-pay-${id}`).onclick = async () => {
+                        const confirm = await Swal.fire({ 
+                            title: 'Confirmar Pagamento?', 
+                            text: `Enviar R$ ${parseFloat(s.valorReceber).toFixed(2)} para ${s.chavePix}?`, 
+                            icon: 'warning', 
+                            showCancelButton: true, 
+                            background: '#1a1a1a', 
+                            color: '#fff' 
+                        });
+                        
+                        if (!confirm.isConfirmed) return;
+
+                        const btn = document.getElementById(`btn-pay-${id}`);
+                        const textoOriginal = btn.innerHTML;
+                        btn.disabled = true;
+                        btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
+
+                        try {
+                            // TENTATIVA AUTOMÁTICA
+                            const response = await fetch(URL_PIPEDREAM_PAYOUT, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                                body: JSON.stringify({
+                                    amount: parseFloat(s.valorReceber),
+                                    pixKey: s.chavePix,
+                                    saqueId: id,
+                                    email: s.email || 'Não informado'
+                                })
+                            });
+
+                            if (response.ok) {
+                                await updateDoc(doc(db, "saques", id), { status: "concluido", dataPagamento: new Date(), metodo: "AUTOMATICO" });
+                                Swal.fire('Sucesso!', 'Enviado ao Pipedream.', 'success');
+                                carregarDadosIniciais();
+                            } else {
+                                const text = await response.text();
+                                throw new Error(`Status ${response.status}: ${text}`);
+                            }
+                        } catch (error) {
+                            console.error("ERRO PIPEDREAM:", error);
+                            
+                            // --- LÓGICA DE CONTINGÊNCIA (BAIXA MANUAL) ---
+                            const confirmManual = await Swal.fire({
+                                icon: 'error',
+                                title: 'Falha na Automação',
+                                text: `O Pipedream falhou (Erro ${error.message}). Deseja dar baixa MANUALMENTE no painel e fazer o PIX pelo seu banco?`,
+                                showCancelButton: true,
+                                confirmButtonText: 'Sim, Baixar Manualmente',
+                                cancelButtonText: 'Não, cancelar',
+                                confirmButtonColor: '#e74c3c',
+                                background: '#1a1a1a',
+                                color: '#fff'
+                            });
+
+                            if (confirmManual.isConfirmed) {
+                                await updateDoc(doc(db, "saques", id), { status: "concluido", dataPagamento: new Date(), metodo: "MANUAL_ERRO_API" });
+                                Swal.fire('Baixa Efetuada!', 'O saque foi marcado como pago no sistema. Faça o PIX manualmente.', 'success');
+                                carregarDadosIniciais();
+                            } else {
+                                btn.disabled = false;
+                                btn.innerHTML = textoOriginal;
+                            }
+                        }
+                    };
+                });
+            } catch (error) {
+                console.error("Erro geral saques:", error);
+            }
+        }
+    </script>
+</body>
+</html>

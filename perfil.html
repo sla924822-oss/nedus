@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil -Nexusy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #1a0505 0%, #000000 100%);
+            --card: rgba(255, 255, 255, 0.05);
+            --red: #e74c3c;
+            --gold: #FFD700;
+            --telegram: #0088cc; /* Cor Azul Telegram */
+        }
+
+        /* REMOVENDO O CONTORNO AZUL DE SELEÇÃO E FOCO */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+            outline: none !important; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body { background: var(--bg); color: white; padding: 20px; padding-bottom: 110px; min-height: 100vh; }
+
+        .profile-header { text-align: center; margin: 30px 0; }
+        .avatar-circle { 
+            width: 80px; height: 80px; background: var(--red); 
+            border-radius: 50%; margin: 0 auto 15px; 
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; border: 3px solid var(--gold);
+        }
+        .user-info h2 { font-size: 1.5rem; margin-bottom: 5px; text-transform: capitalize; }
+        .user-info p { color: #888; font-size: 0.9rem; }
+
+        .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 25px 0; }
+        .stat-box { 
+            background: var(--card); padding: 20px; border-radius: 15px; 
+            border: 1px solid rgba(255,255,255,0.1); text-align: center;
+        }
+        .stat-box small { color: #aaa; font-size: 0.75rem; text-transform: uppercase; }
+        .stat-box span { display: block; font-size: 1.1rem; font-weight: bold; margin-top: 5px; color: var(--gold); }
+
+        .menu-list { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .menu-item { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 18px 20px; color: white; text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: 0.2s;
+        }
+        .menu-item:active { background: rgba(255,255,255,0.05); }
+        
+        /* Ícone padrão vermelho */
+        .menu-item i:first-child { margin-right: 15px; width: 20px; text-align: center; color: var(--red); }
+        
+        /* Ícones azuis para Telegram/Suporte */
+        .menu-item.tg-style i:first-child { color: var(--telegram); }
+
+        .btn-float-tg {
+            position: fixed; bottom: 90px; right: 20px;
+            width: 55px; height: 55px; background-color: var(--telegram);
+            color: #FFF; border-radius: 50px; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 28px; box-shadow: 0px 5px 15px rgba(0,0,0,0.4);
+            z-index: 999; text-decoration: none;
+        }
+
+        /* NAV BOTTOM COM EFEITO VIDRO VERMELHO NO ATIVO */
+        .nav-bottom { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            background: rgba(0, 0, 0, 0.9); 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 12px 0; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            height: 75px;
+            align-items: center;
+        }
+        .nav-item { 
+            color: #555; 
+            text-align: center; 
+            text-decoration: none; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 5px;
+            padding: 8px 0;
+            border-radius: 15px;
+            transition: 0.3s;
+            margin: 0 5px;
+        }
+        .nav-item i { font-size: 1.3rem; }
+        .nav-item span { font-size: 0.65rem; }
+
+        /* ITEM ATIVO: EFEITO VIDRO VERMELHO */
+        .nav-item.active { 
+            color: #fff; 
+            background: rgba(231, 76, 60, 0.2); 
+            border: 1px solid rgba(231, 76, 60, 0.4);
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.2);
+        }
+        .nav-item.active i { color: var(--red); }
+
+        .btn-logout { 
+            margin-top: 30px; width: 100%; padding: 15px; border-radius: 15px; 
+            border: 1px solid rgba(231, 76, 60, 0.3); background: rgba(231, 76, 60, 0.05); 
+            color: var(--red); font-weight: bold; cursor: pointer; margin-bottom: 20px; 
+            transition: 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="https://t.me/monety9220" target="_blank" class="btn-float-tg">
+        <i class="fab fa-telegram-plane"></i>
+    </a>
+
+    <div class="profile-header">
+        <div class="avatar-circle"><i class="fas fa-user"></i></div>
+        <div class="user-info">
+            <h2 id="display-nome">...</h2>
+            <p id="display-email">carregando dados...</p>
+        </div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-box">
+            <small>Saldo Disponível</small>
+            <span id="stat-saldo">R$ 0,00</span>
+        </div>
+        <div class="stat-box">
+            <small>Rede (Indicados)</small>
+            <span id="stat-indicados">0</span>
+        </div>
+    </div>
+
+    <div class="menu-list">
+        <a href="deposito.html" class="menu-item">
+            <span><i class="fas fa-wallet"></i> Depositar Saldo</span>
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="saque.html" class="menu-item">
+            <span><i class="fas fa-hand-holding-usd"></i> Realizar Saque</span>
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="transacoes.html" class="menu-item">
+            <span><i class="fas fa-history"></i> Histórico de Atividades</span>
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        
+        <a href="https://t.me/monety9220" target="_blank" class="menu-item tg-style" style="color: var(--telegram);">
+            <span><i class="fas fa-headset"></i> Suporte Oficial</span>
+            <i class="fas fa-external-link-alt"></i>
+        </a>
+
+        <a href="https://t.me/+9vkfUZAN2g8xMDcx" target="_blank" class="menu-item tg-style" style="color: var(--telegram);">
+            <span><i class="fab fa-telegram"></i> Canal de Avisos VIP</span>
+            <i class="fas fa-external-link-alt"></i>
+        </a>
+    </div>
+
+    <button class="btn-logout" id="btnLogout">Sair com Segurança</button>
+
+    <nav class="nav-bottom">
+        <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="planos.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Planos</span></a>
+        <a href="indicacao.html" class="nav-item"><i class="fas fa-share-alt"></i><span>Indicar</span></a>
+        <a href="perfil.html" class="nav-item active"><i class="fas fa-user-alt"></i><span>Perfil</span></a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKDFw7khZzM9hIX7xbbrbFQeESiCLnmOw",
+    authDomain: "monety-site-9175f.firebaseapp.com",
+    projectId: "monety-site-9175f",
+    storageBucket: "monety-site-9175f.firebasestorage.app",
+    messagingSenderId: "840821848803",
+    appId: "1:840821848803:web:b99a5528e4bb925518a3d6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('display-email').innerText = user.email;
+                try {
+                    const userRef = doc(db, "usuarios", user.uid);
+                    const snap = await getDoc(userRef);
+                    if(snap.exists()){
+                        const d = snap.data();
+                        document.getElementById('display-nome').innerText = d.nome || "Usuário";
+                        document.getElementById('stat-saldo').innerText = `R$ ${(Number(d.saldo) || 0).toFixed(2)}`;
+                        document.getElementById('stat-indicados').innerText = d.indicadosCount || 0;
+                    }
+                } catch (err) {
+                    console.error("Erro ao carregar perfil:", err);
+                }
+            } else { 
+                window.location.href = "index.html"; 
+            }
+        });
+
+        document.getElementById('btnLogout').addEventListener('click', async () => {
+            const result = await Swal.fire({
+                title: 'Sair da conta?',
+                text: "Você precisará fazer login novamente para acessar seus lucros.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#333',
+                confirmButtonText: 'Sim, sair',
+                cancelButtonText: 'Cancelar',
+                background: '#1a0505',
+                color: '#fff'
+            });
+
+            if (result.isConfirmed) {
+                signOut(auth).then(() => {
+                    window.location.href = "index.html"; 
+                });
+            }
+        });
+    </script>
+</body>
+</html>

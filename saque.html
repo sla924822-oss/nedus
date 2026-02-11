@@ -332,11 +332,11 @@
             if (!chavePix) return Swal.fire({ icon: 'error', title: 'Atenção', text: 'Insira sua chave PIX.', background: '#1a0505', color: '#fff' });
             
             // ATUALIZADO: Mínimo de R$ 35,00
-            if (isNaN(valorSaque) || valorSaque < 10) {
+            if (isNaN(valorSaque) || valorSaque < 35) {
                 return Swal.fire({ 
                     icon: 'error', 
                     title: 'Mínimo insuficiente', 
-                    text: 'O valor mínimo para saque é R$ 10,00.', 
+                    text: 'O valor mínimo para saque é R$ 35,00.', 
                     background: '#1a0505', 
                     color: '#fff',
                     confirmButtonColor: '#e74c3c'
